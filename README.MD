@@ -23,6 +23,7 @@ file.
 - [Privacy policy](#privacy-policy)
 - [Contributors](#contributors)
 - [Icons](#icons)
+- [SendOnPost](#send-on-post)
 - [Code derived from third party projects](#code-derived-from-third-party-projects)
 - [License](#license)
 
@@ -275,6 +276,16 @@ See https://github.com/gildas-lormeau/SingleFile/blob/master/privacy.md
 - Icon made by [Kiranshastry](https://www.flaticon.com/authors/kiranshastry)
   from [Flaticon](https://www.flaticon.com/) is licensed by
   [CC 3.0 BY](http://creativecommons.org/licenses/by/3.0/)
+
+## Send on Post
+
+The extension can capture the HTML and send it to a POST endpoint. This feature, called
+`sendOnPost`, can be used by a third-party extension via `chrome.runtime.sendMessage` as shown in the following example.
+
+Example:
+```js
+chrome.runtime.sendMessage(<Single Page Extension ID>, { method: "send-with-httpPost", sendOnPostAddress: "http://myserver.org/api/v1/mySendOnPostEntryPoint" });
+```
 
 ## License
 

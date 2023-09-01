@@ -34,45 +34,57 @@ const ACTION_SAVE_SELECTED = "save-selected-content";
 const ACTION_SAVE_SELECTED_TABS = "save-selected-tabs";
 const ACTION_SAVE_UNPINNED_TABS = "save-unpinned-tabs";
 const ACTION_SAVE_ALL_TABS = "save-all-tabs";
+const ACTION_SEND_ON_POST = "send-with-httpPost";
 
-export { onMessage };
+export {onMessage};
 
 async function onMessage(message, sender) {
-	if (message == ACTION_SAVE_PAGE) {
-		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
-		tabs.length = 1;
-		business.saveTabs(tabs);
-	} else if (message == ACTION_EDIT_AND_SAVE_PAGE) {
-		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
-		tabs.length = 1;
-		business.saveTabs(tabs, { openEditor: true });
-	} else if (message == ACTION_SAVE_SELECTED_LINKS) {
-		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
-		business.saveSelectedLinks(tabs[0]);
-	} else if (message == ACTION_SAVE_SELECTED) {
-		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
-		business.saveTabs(tabs, { selected: true });
-	} else if (message == ACTION_SAVE_SELECTED_TABS) {
-		const tabs = await queryTabs({ currentWindow: true, highlighted: true });
-		business.saveTabs(tabs);
-	} else if (message == ACTION_SAVE_UNPINNED_TABS) {
-		const tabs = await queryTabs({ currentWindow: true, pinned: false });
-		business.saveTabs(tabs);
-	} else if (message == ACTION_SAVE_ALL_TABS) {
-		const tabs = await queryTabs({ currentWindow: true });
-		business.saveTabs(tabs);
-	} else if (message.method) {
-		const tabs = await browser.tabs.query({ currentWindow: true, active: true });
-		const currentTab = tabs[0];
-		if (currentTab) {
-			return autosave.onMessageExternal(message, currentTab, sender);
-		} else {
-			return false;
-		}
-	}
+    console.log("A new event message received")
+    if (message == ACTION_SAVE_PAGE) {
+        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        tabs.length = 1;
+        business.saveTabs(tabs);
+    } else if (message == ACTION_EDIT_AND_SAVE_PAGE) {
+        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        tabs.length = 1;
+        business.saveTabs(tabs, {openEditor: true});
+    } else if (message == ACTION_SAVE_SELECTED_LINKS) {
+        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        business.saveSelectedLinks(tabs[0]);
+    } else if (message == ACTION_SAVE_SELECTED) {
+        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        business.saveTabs(tabs, {selected: true});
+    } else if (message == ACTION_SAVE_SELECTED_TABS) {
+        const tabs = await queryTabs({currentWindow: true, highlighted: true});
+        business.saveTabs(tabs);
+    } else if (message == ACTION_SAVE_UNPINNED_TABS) {
+        const tabs = await queryTabs({currentWindow: true, pinned: false});
+        business.saveTabs(tabs);
+    } else if (message == ACTION_SAVE_ALL_TABS) {
+        const tabs = await queryTabs({currentWindow: true});
+        business.saveTabs(tabs);
+    } else if (message.method && message.method == ACTION_SEND_ON_POST) {
+        const sendOnPostAddress = message.sendOnPostAddress
+        if(sendOnPostAddress) {
+            const tabs = await browser.tabs.query({currentWindow: true, active: true});
+            tabs.length = 1;
+            console.info("[Message "+ACTION_SEND_ON_POST+"] Started")
+            business.saveTabs(tabs, {sendOnPostAddress: message.sendOnPostAddress});
+        }else {
+            console.warn("[Message "+ACTION_SEND_ON_POST+"] no sendOnPostAddress defined. Action will be skipped")
+        }
+    } else if (message.method) {
+        const tabs = await browser.tabs.query({currentWindow: true, active: true});
+        const currentTab = tabs[0];
+        if (currentTab) {
+            return autosave.onMessageExternal(message, currentTab, sender);
+        } else {
+            return false;
+        }
+    }
 }
 
 async function queryTabs(options) {
-	const tabs = await browser.tabs.query(options);
-	return tabs.sort((tab1, tab2) => tab1.index - tab2.index);
+    const tabs = await browser.tabs.query(options);
+    return tabs.sort((tab1, tab2) => tab1.index - tab2.index);
 }
